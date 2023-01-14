@@ -1,10 +1,11 @@
 ﻿[<EntryPoint>]
 let main argv =
-    printfn "Welcome to the FHTW Domain REPL!"
-    printfn "Please enter your commands to interact with the system."
-    printfn "Press CTRL+C to stop the program."
-    printf "> "
-
     let initialState = Domain.init ()
-    Repl.loop initialState
-    0 // return an integer exit code
+    printfn "Welcome to the Blackjack table!\n"
+    printfn "Blackjack pays 3 to 2"
+    printfn "Dealer must draw to 16 and stand on all 17's"
+    printfn "Insurance pays 2 to 1"
+    printfn "You start out with a balance of %.0f" initialState.Player.Balance
+
+    Reply.loop initialState
+    0
