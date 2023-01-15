@@ -8,8 +8,7 @@ let safeEquals (it : string) (theOther : string) =
 [<Literal>]
 let HelpLabel = "Help"
 
-//TODO
-let (|Hit|Stand|DoubleDown|Split|Help|ParseFailed|) (input : string) =
+let (|Hit|Stand|DoubleDown|Split|Insurance|Help|ParseFailed|) (input : string) =
     let tryParseInt (arg : string) valueConstructor =
         let (worked, arg') = Int32.TryParse arg
         if worked then valueConstructor arg' else ParseFailed
@@ -19,6 +18,7 @@ let (|Hit|Stand|DoubleDown|Split|Help|ParseFailed|) (input : string) =
     | [ verb ] when safeEquals verb (nameof Domain.Hit) -> Hit
     | [ verb ] when safeEquals verb (nameof Domain.Stand) -> Stand
     | [ verb ] when safeEquals verb HelpLabel -> Help
-    | [ verb; arg ] when safeEquals verb (nameof Domain.Split) -> Split
-    | [ verb; arg ] when safeEquals verb (nameof Domain.DoubleDown) -> DoubleDown
+    | [ verb;] when safeEquals verb (nameof Domain.Split) -> Split
+    | [ verb;] when safeEquals verb (nameof Domain.DoubleDown) -> DoubleDown
+    | [ verb;] when safeEquals verb (nameof Domain.Insurance) -> Insurance
     | _ -> ParseFailed

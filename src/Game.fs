@@ -25,7 +25,7 @@ let verifyBet (state: State, bet : float) : bool =
             printfn "Bet must be greater than 0"
             false
         | bet when bet > state.Player.Balance ->
-            printfn "Bet must be less than your balance"
+            printfn "Insufficient funds"
             false
         | _ -> true
 
@@ -106,25 +106,33 @@ let endRound (state : State) : State =
             printfn "Dealer wins!"
             stateAfterLoss state
 
+let checkPlayerHand (state : State) (isEndOfRound : bool) : State =
+    match valueHand state.Player.Hand with
+        | value when value > BLACKJACK ->
+            printfn "Player busts!"
+            stateAfterLoss state
+        | value when value = BLACKJACK ->
+            dealerPlays state |> endRound
+        | _ ->
+            match isEndOfRound with
+                | true -> dealerPlays state |> endRound
+                | false -> state
 
 let hit (state : State) : State =
     let player = { state.Player with Hand = state.Player.Hand @ [drawCard()] }
-    let newState = { state with Player = player }
 
-    match valueHand player.Hand with
-        | value when value > BLACKJACK ->
-            endRound newState
-        | value when value = BLACKJACK ->
-            dealerPlays newState |> endRound
-        | _ -> newState
+    checkPlayerHand { state with Player = player } false
 
 
 let stand (state : State) : State =
     dealerPlays state |> endRound
 
 let doubleDown (state : State) : State =
-    //TODO double down
-    state
+    match verifyBet (state, state.Bet) with
+        | false -> state
+        | true ->
+            let player = { state.Player with Hand = state.Player.Hand @ [drawCard()]; Balance = state.Player.Balance - state.Bet }
+            checkPlayerHand { state with Player = player; Bet = state.Bet * 2.0 } true
 
 let split (state : State) : State =
     //TODO split
