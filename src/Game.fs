@@ -19,41 +19,15 @@ let drawCard () : Card =
     let rankIndex = random.Next(List.length ranks)
     { Suit = List.item suitIndex suits; Rank = List.item rankIndex ranks }
 
-
-let startRound (bet : float) (state : State) : State =
-    //TODO check for blackjack at the beginning of the game
-    { state with
-        Bet = bet;
-        Player = { state.Player with Hand = [drawCard(); drawCard()]; Balance = state.Player.Balance - bet};
-        Dealer = { state.Dealer with Hand = [drawCard()] }
-    }
-
-
-let endRound (state : State) : State =
-    let playerBalance =
-        match valueHand state.Player.Hand, valueHand state.Dealer.Hand with
-        | playerValue, _ when playerValue > BLACKJACK ->
-            printfn "Player busts!"
-            printfn "%i" playerValue
-            state.Player.Balance - state.Bet
-        | _, dealerValue when dealerValue > BLACKJACK ->
-            printfn "Dealer busts!"
-            state.Player.Balance + (state.Bet * PAYOUT_FACTOR)
-        | playerValue, dealerValue when dealerValue = playerValue ->
-            printfn "Push!"
-            state.Player.Balance
-        | playerValue, dealerValue when playerValue > dealerValue ->
-            printfn "Player wins!"
-            state.Player.Balance + (state.Bet * PAYOUT_FACTOR)
-        | _ ->
-            printfn "Dealer wins!"
-            state.Player.Balance - state.Bet
-
-    { state with
-        Player = { state.Player with Balance = playerBalance; Hand = [] };
-        Dealer = { state.Dealer with Hand = [] };
-        Bet = 0.0 }
-
+let verifyBet (state: State, bet : float) : bool =
+    match bet with
+        | bet when bet <= 0.0 ->
+            printfn "Bet must be greater than 0"
+            false
+        | bet when bet > state.Player.Balance ->
+            printfn "Bet must be less than your balance"
+            false
+        | _ -> true
 
 let rec dealerDrawsLoop (dealer : Dealer) : Dealer =
     dealer.Hand
@@ -71,17 +45,73 @@ let dealerPlays (state : State) : State =
     let newDealer =  dealerDrawsLoop state.Dealer
     {state with Dealer = newDealer}
 
-let bet (bet : float) (state : State) : State =
-     {state with
-        Bet = bet
-        Player = {state.Player with Balance = state.Player.Balance - bet}
-    }
+let stateAfterPush (state : State) : State =
+    { state with
+        Player = { state.Player with Balance =  state.Player.Balance + state.Bet; Hand = [] };
+        Dealer = { state.Dealer with Hand = [] };
+        Bet = 0.0 }
+
+let stateAfterWin (state : State) : State =
+    { state with
+        Player = { state.Player with Balance = state.Player.Balance + (state.Bet * PAYOUT_FACTOR); Hand = [] };
+        Dealer = { state.Dealer with Hand = [] };
+        Bet = 0.0 }
+
+let stateAfterLoss (state : State) : State =
+    { state with
+        Player = { state.Player with Hand = [] };
+        Dealer = { state.Dealer with Hand = [] };
+        Bet = 0.0 }
+
+let stateAfterBlackjack (state : State) : State =
+    { state with
+        Player = { state.Player with Balance = state.Player.Balance + (state.Bet * BLACKJACK_PAYOUT_FACTOR); Hand = [] };
+        Dealer = { state.Dealer with Hand = [] };
+        Bet = 0.0 }
+
+let checkForBlackjack (state : State) : State =
+    match valueHand state.Player.Hand with
+        | value when value = BLACKJACK ->
+            match valueHand state.Dealer.Hand with
+                | value when value = BLACKJACK ->
+                    printfn "Push!"
+                    stateAfterPush state
+                | _ ->
+                    printfn "Blackjack!"
+                    stateAfterBlackjack state
+        | _ -> state
+
+let startRound (bet : float) (state : State) : State =
+    let player = { state.Player with Hand = [drawCard(); drawCard()]; Balance = state.Player.Balance - bet }
+    let dealer = { state.Dealer with Hand = [drawCard()] }
+
+    checkForBlackjack { state with Bet = bet; Player = player; Dealer = dealer }
+
+
+let endRound (state : State) : State =
+    match valueHand state.Player.Hand, valueHand state.Dealer.Hand with
+        | playerValue, _ when playerValue > BLACKJACK ->
+            printfn "Player busts!"
+            stateAfterLoss state
+        | _, dealerValue when dealerValue > BLACKJACK ->
+            printfn "Dealer busts!"
+            stateAfterWin state
+        | playerValue, dealerValue when dealerValue = playerValue ->
+            printfn "Push!"
+            stateAfterPush state
+        | playerValue, dealerValue when playerValue > dealerValue ->
+            printfn "Player wins!"
+            stateAfterWin state
+        | _ ->
+            printfn "Dealer wins!"
+            stateAfterLoss state
+
 
 let hit (state : State) : State =
     let player = { state.Player with Hand = state.Player.Hand @ [drawCard()] }
     let newState = { state with Player = player }
 
-    match valueHand player.Hand with //TODO maybe adapt this?
+    match valueHand player.Hand with
         | value when value > BLACKJACK ->
             endRound newState
         | value when value = BLACKJACK ->

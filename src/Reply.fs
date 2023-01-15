@@ -27,57 +27,65 @@ let createHelpText () : string =
     |> Array.fold (fun prev curr -> prev + " " + curr) ""
     |> (fun s -> s.Trim() |> sprintf "Known commands are: %s")
 
+let createStateTextHand (hand : Domain.Hand) : string =
+    hand
+    |> List.map (fun item -> sprintf " %A of %A\n" item.Rank item.Suit)
+    |> String.concat ""
+
 let createStateText (state: State) : string =
-    let playerBalance = sprintf "Player balance: %.2f\n" state.Player.Balance
-    let currentBet = sprintf "Current bet: %.2f\n" state.Bet
+    let messages = [
+        sprintf "Player balance: %.2f" state.Player.Balance;
+        sprintf "Current bet: %.2f\n" state.Bet;
+        sprintf "Player Hand Value: %i" (Game.valueHand state.Player.Hand);
+        createStateTextHand state.Player.Hand
+        sprintf "Dealer Hand Value: %i" (Game.valueHand state.Dealer.Hand);
+        createStateTextHand state.Dealer.Hand
+    ]
 
-    let playerHandValue = sprintf "Player Hand Value: %i\n" (Game.valueHand state.Player.Hand)
-    let playerHand =
-        state.Player.Hand
-            |> List.map (fun item -> sprintf " %A of %A\n" item.Rank item.Suit)
-            |> String.concat ""
-
-    let dealerHandValue = sprintf "Dealer Hand Value: %i\n" (Game.valueHand state.Dealer.Hand)
-    let dealerHand =
-        state.Dealer.Hand
-            |> List.map (fun item -> sprintf " %A of %A\n" item.Rank item.Suit)
-            |> String.concat ""
-
-    playerBalance + currentBet + "\n"  + playerHandValue + "Player Hand: \n" + playerHand + "\n" + dealerHandValue + "Dealer Hand: \n" + dealerHand
+    String.concat "\n" messages
 
 let evaluate (update : Domain.Message -> State -> State)  (state : State) (msg : Message) =
     match msg with
     | DomainMessage msg ->
-        let newState = update msg state
-        let message = createStateText newState
-        (newState, message)
+        let newState = Game.update msg state
+        (newState, createStateText newState)
     | HelpRequested ->
-        let message = createHelpText ()
-        (state, message)
+        (state, createHelpText ())
     | NotParsable originalInput ->
         let message =
             sprintf """"%s" was not parsable. %s"""  originalInput "You can get information about known commands by typing \"Help\""
         (state, message)
 
-let print (state : State, outputToPrint : string) = //TODO adapt output
+let print (state : State, outputToPrint : string) =
     printfn "%s" outputToPrint
     printf "> "
     state
 
-let roundStart  (state : State) : State =
-    printfn "\n---------"
+let rec tryPlaceBet (state : State) : float =
     let message = sprintf "Please place your bet: "
-    print (state, message)
+    print (state, message) |> ignore
     let bet = Console.ReadLine()
-    let newState = Game.startRound (float bet) state //TODO check if bet is valid
-    print (newState, createStateText newState)
-    newState
+    try
+        let bet = float bet
+        match Game.verifyBet (state, bet) with
+            | false -> tryPlaceBet state
+            | true -> bet
+    with
+        | :? System.FormatException ->
+            printfn "Invalid input, please enter a number"
+            tryPlaceBet state
 
+let roundStart (state : State) : State =
+    printfn "\n---------"
+    let bet = tryPlaceBet state
+    let newState = Game.startRound (float bet) state
+    print (newState, createStateText newState)
 
 let rec loop (state : State) : State =
-    //TODO game over when player has no funds
-     match state.Bet with
-        | 0.0 -> roundStart state |> loop
+     match state.Bet, state.Player.Balance with
+        | bet, balance when bet = 0.0 && balance = 0.0 ->
+            print (state, "Game over, you have no funds left")
+        | bet, _ when bet = 0.0 -> roundStart state |> loop
         | _ ->
             Console.ReadLine()
             |> read
