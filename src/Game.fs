@@ -35,13 +35,13 @@ let rec dealerDrawsLoop (dealer : Dealer) : Dealer =
         |> function
             | value when value <= DEALER_HIGHEST_SOFT_HIT ->
                 let newCard = drawCard()
-                printf " %A of %A\n" newCard.Rank newCard.Suit
+                printf $" %A{newCard.Rank} of %A{newCard.Suit}\n"
                 dealerDrawsLoop { dealer with Hand = dealer.Hand @ [newCard] }
             | _ -> dealer
 
 let dealerPlays (state : State) : State =
     printfn "Dealer's hand:"
-    printf " %A of %A\n" state.Dealer.Hand[0].Rank state.Dealer.Hand[0].Suit
+    printf $" %A{state.Dealer.Hand[0].Rank} of %A{state.Dealer.Hand[0].Suit}\n"
     let newDealer =  dealerDrawsLoop state.Dealer
     {state with Dealer = newDealer}
 

@@ -29,16 +29,16 @@ let createHelpText () : string =
 
 let createStateTextHand (hand : Domain.Hand) : string =
     hand
-    |> List.map (fun item -> sprintf " %A of %A\n" item.Rank item.Suit)
+    |> List.map (fun item -> $" %A{item.Rank} of %A{item.Suit}\n")
     |> String.concat ""
 
 let createStateText (state: State) : string =
     let messages = [
-        sprintf "Player balance: %.2f" state.Player.Balance;
-        sprintf "Current bet: %.2f\n" state.Bet;
-        sprintf "Player Hand Value: %i" (Game.valueHand state.Player.Hand);
+        $"Player balance: %.2f{state.Player.Balance}";
+        $"Current bet: %.2f{state.Bet}\n";
+        $"Player Hand Value: %i{Game.valueHand state.Player.Hand}";
         createStateTextHand state.Player.Hand
-        sprintf "Dealer Hand Value: %i" (Game.valueHand state.Dealer.Hand);
+        $"Dealer Hand Value: %i{Game.valueHand state.Dealer.Hand}";
         createStateTextHand state.Dealer.Hand
     ]
 
@@ -53,11 +53,11 @@ let evaluate (update : Domain.Message -> State -> State)  (state : State) (msg :
         (state, createHelpText ())
     | NotParsable originalInput ->
         let message =
-            sprintf """"%s" was not parsable. %s"""  originalInput "You can get information about known commands by typing \"Help\""
+            $""""%s{originalInput}" was not parsable. {"You can get information about known commands by typing \"Help\""}"""
         (state, message)
 
 let print (state : State, outputToPrint : string) =
-    printfn "%s" outputToPrint
+    printfn $"%s{outputToPrint}"
     printf "> "
     state
 
