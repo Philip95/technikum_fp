@@ -5,7 +5,7 @@ let BLACKJACK = 21
 let DEALER_HIGHEST_SOFT_HIT = 16
 let PAYOUT_FACTOR = 2.0
 let BLACKJACK_PAYOUT_FACTOR = 2.5
-let INSURANCE_PAYOUT_FACTOR = 2.0
+let INSURANCE_PAYOUT_FACTOR = 3.0
 
 type Suit = Clubs | Diamonds | Hearts | Spades
 type Rank = Two | Three | Four | Five | Six | Seven | Eight | Nine | Ten | Jack | Queen | King | Ace
