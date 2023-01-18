@@ -7,5 +7,5 @@ let main argv =
     printfn "Insurance pays 2 to 1"
     printfn "You start out with a balance of %.0f" initialState.Player.Balance
 
-    Reply.loop initialState
+    Reply.loop initialState |> ignore
     0

@@ -36,9 +36,10 @@ let rec createStateTextFromHandLoop (handList: Domain.Hand list, currentHand: in
     match handList with
     | [] -> ""
     | hd::tl ->
-        let currentHandString = match currentHand with
-            | currentHand when currentHand = index -> $"[current hand]";
-            | _ -> ""
+        let currentHandString =
+            match currentHand with
+                | currentHand when currentHand = index -> $"[current hand]";
+                | _ -> ""
 
         let messages = [
             currentHandString;
