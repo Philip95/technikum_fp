@@ -32,17 +32,40 @@ let createStateTextHand (hand : Domain.Hand) : string =
     |> List.map (fun item -> $" %A{item.Rank} of %A{item.Suit}\n")
     |> String.concat ""
 
-let createStateText (state: State) : string =
-    let messages = [
-        $"Player balance: %.2f{state.Player.Balance}";
-        $"Current bet: %.2f{state.Bet}\n";
-        $"Player Hand Value: %i{Game.valueHand state.Player.Hand}";
-        createStateTextHand state.Player.Hand
-        $"Dealer Hand Value: %i{Game.valueHand state.Dealer.Hand}";
-        createStateTextHand state.Dealer.Hand
-    ]
+let rec createStateTextFromHandLoop (handList: Domain.Hand list, currentHand: int, index : int) : string =
+    match handList with
+    | [] -> ""
+    | hd::tl ->
+        let currentHandString = match currentHand with
+            | currentHand when currentHand = index -> $"[current hand]";
+            | _ -> ""
 
-    String.concat "\n" messages
+        let messages = [
+            currentHandString;
+            $"Hand Value: %i{Game.valueHand hd}";
+            createStateTextHand hd
+        ]
+
+        let message = String.concat "\n" messages
+        message + createStateTextFromHandLoop (tl, currentHand, index+1)
+
+
+let createStateText (state: State) : string =
+
+    match state.Bet with
+    | 0.00 -> $"Player balance: %.2f{state.Player.Balance}";
+    | _ ->
+        let messages = [
+            $"Player balance: %.2f{state.Player.Balance}";
+            $"Current bet: %.2f{state.Bet}";
+            $"Current Insurance Value: %.2f{state.Insurance}\n";
+            $"Player Hands:\n";
+            createStateTextFromHandLoop (state.Player.Hands, state.currentHand, 0);
+            $"Dealer Hand Value: %i{Game.valueHand state.Dealer.Hand}";
+            createStateTextHand state.Dealer.Hand
+        ]
+
+        String.concat "\n" messages
 
 let evaluate (update : Domain.Message -> State -> State)  (state : State) (msg : Message) =
     match msg with

@@ -12,10 +12,10 @@ type Rank = Two | Three | Four | Five | Six | Seven | Eight | Nine | Ten | Jack 
 type Card = { Suit: Suit; Rank: Rank }
 type Hand = Card list
 
-type Player = { Balance: float; mutable Hand: Hand }
+type Player = { Balance: float; mutable Hands: Hand list }
 type Dealer = { mutable Hand: Hand }
 
-type State = { Player: Player; Dealer: Dealer; Bet: float; Insurance: float }
+type State = { Player: Player; Dealer: Dealer; Bet: float; Insurance: float; currentHand: int }
 type Message =
     | Hit
     | Stand
@@ -24,7 +24,7 @@ type Message =
     | Insurance
 
 let init () : State =
-    { Player = { Balance = INITAL_CASH; Hand = [] }; Dealer = { Hand = [] }; Bet = 0; Insurance = 0 }
+    { Player = { Balance = INITAL_CASH; Hands = [] }; Dealer = { Hand = [] }; Bet = 0; Insurance = 0; currentHand = 0 }
 
 let value card =
     match card.Rank with
@@ -41,4 +41,14 @@ let value card =
     | Jack -> 10
     | Queen -> 10
     | King -> 10
+
+type payoutOption = Blackjack | Push | Win | Insurance | Loose
+
+let payout value payoutOption =
+    match payoutOption with
+    | Blackjack -> value * BLACKJACK_PAYOUT_FACTOR
+    | Push -> value
+    | Win -> value * PAYOUT_FACTOR
+    | Insurance -> value * INSURANCE_PAYOUT_FACTOR
+    | Loose -> 0.0
 
