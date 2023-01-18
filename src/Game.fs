@@ -10,7 +10,6 @@ let valueHand (hand:Hand) : int =
         | value when value > 21 -> initialValue - (numAces * 10)
         | value -> value
 
-
 let drawCard () : Card =
     let suits = [Clubs; Diamonds; Hearts; Spades]
     let ranks = [Two; Three; Four; Five; Six; Seven; Eight; Nine; Ten; Jack; Queen; King; Ace]
@@ -54,7 +53,7 @@ let resetState (state: State, payout: float) : State =
         Insurance = 0.0}
 
 let checkForBlackjack (state : State) : State =
-    match valueHand state.Player.Hands[state.currentHand] with
+    match valueHand state.Player.Hands[state.CurrentHand] with
         | value when value = BLACKJACK ->
             match valueHand state.Dealer.Hand with
                 | value when value = BLACKJACK ->
@@ -143,17 +142,17 @@ let isPlayerHandEnded (hand : Hand) : Boolean =
 
 let checkLastHand (state: State) : State =
     match state.Player.Hands.Length with
-        | length when length = state.currentHand + 1 -> dealerPlays state |> endRound
-        | _ ->  { state with currentHand = state.currentHand + 1 }
+        | length when length = state.CurrentHand + 1 -> dealerPlays state |> endRound
+        | _ ->  { state with CurrentHand = state.CurrentHand + 1 }
 
 let drawCardToHand (index: int) (hands: Hand list) =
     List.mapi (fun i hand -> if i = index then drawCard() :: hand else hand) hands
 
 let hit (state : State) : State =
-    let player = { state.Player with Hands = drawCardToHand state.currentHand state.Player.Hands }
+    let player = { state.Player with Hands = drawCardToHand state.CurrentHand state.Player.Hands }
     let newState = { state with Player = player }
 
-    match isPlayerHandEnded newState.Player.Hands[state.currentHand] with
+    match isPlayerHandEnded newState.Player.Hands[state.CurrentHand] with
         | true ->
             printfn "Player hand ended!"
             checkLastHand newState
@@ -171,10 +170,10 @@ let doubleDown (state : State) : State =
             match verifyBet (state, state.Bet) with
                 | false -> state
                 | true ->
-                    let playerHand = state.Player.Hands.[state.currentHand]
+                    let playerHand = state.Player.Hands.[state.CurrentHand]
                     let player = { state.Player with Hands = [drawCard() :: playerHand]; Balance = state.Player.Balance - state.Bet }
                     let newState = { state with Player = player; Bet = state.Bet * 2.0 }
-                    match isPlayerHandEnded newState.Player.Hands[state.currentHand] with
+                    match isPlayerHandEnded newState.Player.Hands[state.CurrentHand] with
                         | true -> dealerPlays newState |> endRound
                         | false -> state
         | _ ->
@@ -187,12 +186,12 @@ let splitSublistsAt (lists: list<list<int>>) (index: int) =
     sublist |> List.map (fun x -> [x])
 
 let split (state : State) : State =
-    match state.Player.Hands[state.currentHand], state.Player.Hands[state.currentHand].Length with
+    match state.Player.Hands[state.CurrentHand], state.Player.Hands[state.CurrentHand].Length with
         | hand, length when hand.[0].Rank = hand.[1].Rank && length = 2 ->
             match verifyBet (state, state.Bet) with
                 | false -> state
                 | true ->
-                    let playerHand = state.Player.Hands.[state.currentHand]
+                    let playerHand = state.Player.Hands.[state.CurrentHand]
                     let updatedPlayerHand: Hand list = playerHand |> List.map (fun card -> [card; drawCard()])
                     let player = { state.Player with Hands = updatedPlayerHand; Balance = state.Player.Balance - state.Bet }
 

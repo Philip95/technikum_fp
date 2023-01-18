@@ -15,7 +15,7 @@ type Hand = Card list
 type Player = { Balance: float; mutable Hands: Hand list }
 type Dealer = { mutable Hand: Hand }
 
-type State = { Player: Player; Dealer: Dealer; Bet: float; Insurance: float; currentHand: int }
+type State = { Player: Player; Dealer: Dealer; Bet: float; Insurance: float; CurrentHand: int }
 type Message =
     | Hit
     | Stand
@@ -24,7 +24,7 @@ type Message =
     | Insurance
 
 let init () : State =
-    { Player = { Balance = INITAL_CASH; Hands = [] }; Dealer = { Hand = [] }; Bet = 0; Insurance = 0; currentHand = 0 }
+    { Player = { Balance = INITAL_CASH; Hands = [] }; Dealer = { Hand = [] }; Bet = 0; Insurance = 0; CurrentHand = 0 }
 
 let value card =
     match card.Rank with

@@ -17,4 +17,10 @@ Execute the following command.
 dotnet run src/Blackjack.fsproj
 ```
 
+## Git Repository
+
+Git Repository can be found at https://github.com/Philip95/technikum_fp
+
 ## Rationale
+
+//TODO describe files and explain the game shortly
