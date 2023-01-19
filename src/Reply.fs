@@ -103,7 +103,7 @@ let rec tryPlaceBet (state : State) : float =
             | true -> bet
     with
         | :? System.FormatException ->
-            printfn "Invalid input, please enter a number"
+            printfn "Invalid input, please enter a number\n"
             tryPlaceBet state
 
 ///starts a new round
@@ -118,7 +118,7 @@ let rec loop (state : State) : State =
      match state.Bet, state.Player.Balance with
         //if the player has no funds left the game is over
         | bet, balance when bet = 0.0 && balance = 0.0 ->
-            print (state, "Game over, you have no funds left")
+            print (state, "\nGame over, you have no funds left\n")
         //start a new round if the player has no bet
         | bet, _ when bet = 0.0 -> roundStart state |> loop
         | _ ->

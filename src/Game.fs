@@ -170,17 +170,17 @@ let stand (state : State) : State =
 
 ///player doubles down - doubles the bet and draws a card
 let doubleDown (state : State) : State =
+    let isBetValid = isBetValid (state, state.Bet)
     match state.Player.Hands.Length with
-        | cardCount when cardCount = 1 && isBetValid (state, state.Bet) ->
+        | cardCount when cardCount = 1 && isBetValid ->
             let playerHand = state.Player.Hands.[state.CurrentHand]
+            //player draws onw more card
             let player = { state.Player with Hands = [drawCard() :: playerHand]; Balance = state.Player.Balance - state.Bet }
             let newState = { state with Player = player; Bet = state.Bet * 2.0 }
 
-            //check if the player hand is over
-            match isPlayerHandEnded newState.Player.Hands[state.CurrentHand] with
-                | true -> dealerPlays newState |> endRound
-                | false -> state
-        | _ when isBetValid (state, state.Bet) = false -> state //bet is not valid
+            //round ends
+            dealerPlays newState |> endRound
+        | _ when isBetValid = false -> state //bet is not valid
         | _ -> //double down is not allowed when splitting
             printfn "Double down is not allowed when splitting\n"
             state
@@ -188,23 +188,23 @@ let doubleDown (state : State) : State =
 
 ///player splits - splits the current hand into two hands
 let split (state : State) : State =
+    let isBetValid = isBetValid (state, state.Bet)
     match state.Player.Hands[state.CurrentHand], state.Player.Hands[state.CurrentHand].Length with
-        | hand, length when hand[0].Rank = hand[1].Rank && length = 2 && isBetValid (state, state.Bet) ->
+        | hand, length when hand[0].Rank = hand[1].Rank && length = 2 && isBetValid ->
             let playerHand = state.Player.Hands.[state.CurrentHand]
             let updatedPlayerHand: Hand list = playerHand |> List.map (fun card -> [card; drawCard()])
             let player = { state.Player with Hands = updatedPlayerHand; Balance = state.Player.Balance - state.Bet }
+            let newState = { state with Player = player}
 
             match value playerHand[0], value playerHand[1] with
                 | card0, card1 when card0 = 11 && card1 = 11 -> //player has two aces - game ends
-                    dealerPlays state |> endRound
+                    dealerPlays newState |> endRound
                 | _ ->
-                    let newState = { state with Player = player}
-
                     //check if the player hand is over
                     match isPlayerHandEnded updatedPlayerHand[0], isPlayerHandEnded updatedPlayerHand[1] with
                         | true, true -> dealerPlays newState |> endRound
                         | _, _ -> newState
-        | _ when isBetValid (state, state.Bet) = false -> state //bet is not valid
+        | _ when isBetValid = false -> state //bet is not valid
         | _ -> //split is not allowed when splitting
             printfn "Split is not allowed when the hand is not a pair\n"
             state
