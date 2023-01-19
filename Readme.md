@@ -22,8 +22,6 @@ dotnet run src/Blackjack.fsproj
 Git Repository can be found at https://github.com/Philip95/technikum_fp
 
 ## Rationale
-
-//TODO describe files and explain the game shortly
 ### Game
 
 For this Project Blackjack was chosen. Blackjack is a card game where players try to get a hand with a higher total value than the dealer without going over 21.

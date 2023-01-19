@@ -72,10 +72,10 @@ let createStateText (state: State) : string =
         String.concat "\n" messages
 
 ///returns a updated state and a string with the output
-let evaluate (_ : Domain.Message -> State -> State)  (state : State) (msg : Message) =
+let evaluate (update: Domain.Message -> State -> State)  (state : State) (msg : Message) =
     match msg with
     | DomainMessage msg ->
-        let newState = Game.update msg state
+        let newState = update msg state
         (newState, createStateText newState)
     | HelpRequested ->
         (state, createHelpText ())
