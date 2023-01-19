@@ -12,8 +12,8 @@ type Rank = Two | Three | Four | Five | Six | Seven | Eight | Nine | Ten | Jack 
 type Card = { Suit: Suit; Rank: Rank }
 type Hand = Card list
 
-type Player = { Balance: float; mutable Hands: Hand list }
-type Dealer = { mutable Hand: Hand }
+type Player = { Balance: float; Hands: Hand list }
+type Dealer = { Hand: Hand }
 
 type State = { Player: Player; Dealer: Dealer; Bet: float; Insurance: float; CurrentHand: int }
 type Message =

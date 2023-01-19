@@ -98,7 +98,7 @@ let rec tryPlaceBet (state : State) : float =
     let bet = Console.ReadLine()
     try
         let bet = float bet
-        match Game.verifyBet (state, bet) with
+        match Game.isBetValid (state, bet) with
             | false -> tryPlaceBet state
             | true -> bet
     with
