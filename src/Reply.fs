@@ -2,7 +2,6 @@ module Reply
 
 open System
 open Microsoft.FSharp.Reflection
-open Parser
 
 type Message =
     | DomainMessage of Domain.Message
@@ -73,7 +72,7 @@ let createStateText (state: State) : string =
         String.concat "\n" messages
 
 ///returns a updated state and a string with the output
-let evaluate (update : Domain.Message -> State -> State)  (state : State) (msg : Message) =
+let evaluate (_ : Domain.Message -> State -> State)  (state : State) (msg : Message) =
     match msg with
     | DomainMessage msg ->
         let newState = Game.update msg state
@@ -93,7 +92,7 @@ let print (state : State, outputToPrint : string) =
 
 ///tries to place a bet, if the input is not a number or the bet is invalid it will ask again
 let rec tryPlaceBet (state : State) : float =
-    let message = sprintf "Please place your bet: "
+    let message = "Please place your bet: "
     print (state, message) |> ignore
     let bet = Console.ReadLine()
     try
@@ -102,7 +101,7 @@ let rec tryPlaceBet (state : State) : float =
             | false -> tryPlaceBet state
             | true -> bet
     with
-        | :? System.FormatException ->
+        | :? FormatException ->
             printfn "Invalid input, please enter a number\n"
             tryPlaceBet state
 

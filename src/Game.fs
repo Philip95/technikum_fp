@@ -15,7 +15,7 @@ let valueHand (hand:Hand) : int =
 let drawCard () : Card =
     let suits = [Clubs; Diamonds; Hearts; Spades]
     let ranks = [Two; Three; Four; Five; Six; Seven; Eight; Nine; Ten; Jack; Queen; King; Ace]
-    let random = System.Random()
+    let random = Random()
     let suitIndex = random.Next(List.length suits)
     let rankIndex = random.Next(List.length ranks)
     { Suit = List.item suitIndex suits; Rank = List.item rankIndex ranks }
@@ -143,7 +143,7 @@ let isPlayerHandEnded (hand : Hand) : Boolean =
             true
         | value when value = BLACKJACK -> //blackjack
             true
-        | value ->
+        | _ ->
             false
 
 ///checks if the player has more hands to play
@@ -173,7 +173,7 @@ let doubleDown (state : State) : State =
     let isBetValid = isBetValid (state, state.Bet)
     match state.Player.Hands.Length with
         | cardCount when cardCount = 1 && isBetValid ->
-            let playerHand = state.Player.Hands.[state.CurrentHand]
+            let playerHand = state.Player.Hands[state.CurrentHand]
             //player draws onw more card
             let player = { state.Player with Hands = [drawCard() :: playerHand]; Balance = state.Player.Balance - state.Bet }
             let newState = { state with Player = player; Bet = state.Bet * 2.0 }
@@ -191,7 +191,7 @@ let split (state : State) : State =
     let isBetValid = isBetValid (state, state.Bet)
     match state.Player.Hands[state.CurrentHand], state.Player.Hands[state.CurrentHand].Length with
         | hand, length when hand[0].Rank = hand[1].Rank && length = 2 && isBetValid ->
-            let playerHand = state.Player.Hands.[state.CurrentHand]
+            let playerHand = state.Player.Hands[state.CurrentHand]
             let updatedPlayerHand: Hand list = playerHand |> List.map (fun card -> [card; drawCard()])
             let player = { state.Player with Hands = updatedPlayerHand; Balance = state.Player.Balance - state.Bet }
             let newState = { state with Player = player}

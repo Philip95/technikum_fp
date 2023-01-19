@@ -10,7 +10,7 @@ let HelpLabel = "Help"
 
 let (|Hit|Stand|DoubleDown|Split|Insurance|Help|ParseFailed|) (input : string) =
     let tryParseInt (arg : string) valueConstructor =
-        let (worked, arg') = Int32.TryParse arg
+        let worked, arg' = Int32.TryParse arg
         if worked then valueConstructor arg' else ParseFailed
 
     let parts = input.Split(' ') |> List.ofArray
